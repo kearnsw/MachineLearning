@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+import sys
+import argparse
+import numpy as np
+
+cli = argparse.ArgumentParser()
+cli.add_argument("--mu", type=float, help="mean of distribution")
+cli.add_argument("--sigma", type=float, help="std. dev. of distribtuion")
+cli.add_argument("--samples", type=int, help="number of samples taken")
+args = cli.parse_args()
+
+gauss = np.random.normal(args.mu, args.sigma, args.samples)
+np.savetxt("data/data.out", gauss)
+

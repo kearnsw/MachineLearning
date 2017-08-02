@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+import pandas as pd
+import argparse
+from sys import stdout
+from decimal import Decimal
+
+
+def findTheta(df, area):
+    cumSum = 0
+    for idx, value in enumerate(df.posterior):
+        cumSum += value
+        if cumSum >= area:
+            return df.mu.iloc[idx]
+
+
+def findCredibleInterval(df, percentage):
+    total = sum(df.posterior)
+    
+    area1 = total * percentage/100
+    theta1 = findTheta(df, area1)
+    
+    area2 = total * (1 - percentage/100)
+    theta2 = findTheta(df, area2)
+
+    return theta1, theta2 
+
+
+def main():
+    # Parse cli arguments
+    cli_parser = argparse.ArgumentParser()
+    cli_parser.add_argument("-i", "--input", type=str, help="input csv file")
+    cli_parser.add_argument("-p", "--percent", type=Decimal, help="percentage area for each tail")
+    args = cli_parser.parse_args()
+
+    # Read data
+    df = pd.read_csv(args.input)
+    df = df.applymap(lambda x: Decimal(x))
+
+    # Find credible interval
+    theta1, theta2 = findCredibleInterval(df, args.percent)
+    stdout.write("mu_1 = {theta_1:.9f}\nmu_2 = {theta_2:.9f}\n".format(theta_1=theta1, theta_2=theta2))
+    stdout.flush() 
+
+if __name__ == "__main__":
+    main()

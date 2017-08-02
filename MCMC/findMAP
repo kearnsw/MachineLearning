@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+
+import pandas as pd
+import sys
+from decimal import Decimal
+
+data = pd.read_csv(sys.argv[1])
+posterior = data["posterior"].apply(lambda x: Decimal(x))
+print(data.iloc[posterior.idxmax()])
+

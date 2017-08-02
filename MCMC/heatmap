@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+import pandas as pd
+from seaborn import jointplot, plt
+import sys
+from decimal import Decimal
+
+data = pd.read_csv(sys.argv[1])
+posterior = data["posterior"].apply(lambda x: Decimal(x))
+print(data.iloc[posterior.idxmax()])
+g = jointplot(data["mu"], data["sigma"], kind="kde")
+plt.show()
+

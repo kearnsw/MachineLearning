@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+import argparse
+import numpy as np
+import math
+from decimal import Decimal
+
+
+def parse_args():
+    cli = argparse.ArgumentParser()
+    cli.add_argument("--mu", default=None, type=Decimal, help="initial guess at mean of distribution")
+    cli.add_argument("--mu_min", type=Decimal, help="mean minimum value to be explored")
+    cli.add_argument("--mu_max", type=Decimal, help="mean maximum value to be explored")
+    cli.add_argument("--sigma", default=None, type=Decimal, help="initial guess at std. dev. of distribtuion")
+    cli.add_argument("--sigma_min", type=Decimal, help="std. dev. minimum value to be explored")
+    cli.add_argument("--sigma_max", type=Decimal, help="std. dev. maximum value to be explored")
+    cli.add_argument("--samples", type=int, help="number of samples taken")
+    cli.add_argument("--stepsize", type=Decimal, help="step size of metropolis algorithm")
+    return cli.parse_args()
+
+
+def gaussian(x, mu, sig):
+    return 1/np.sqrt(2*Decimal(math.pi)*sig**2) * np.exp(-(x - mu)**2 / (2 * sig**2))
+
+
+def pdf(data, mu, sigma):
+    total = 1
+    for point in data:
+        total *= gaussian(point, mu, sigma)
+    return total
+
+
+if __name__ == "__main__":
+
+    args = parse_args()
+
+    with open("data/data.out", "r") as f:
+        data = []
+        for line in f:
+            data.append(Decimal(line.strip()))
+
+    mu = Decimal(np.random.random()) * (args.mu_max - args.mu_min) + args.mu_min
+    sigma = Decimal(np.random.random()) * (args.sigma_max - args.sigma_min) + args.sigma_min
+
+    if args.mu:
+        mu = args.mu
+    if args.sigma:
+        sigma = args.sigma
+
+    MAX_ITERATION = args.samples
+    print("{0},{1},{2}".format("mu", "sigma", "posterior"))
+    for i in range(MAX_ITERATION):
+        s1 = Decimal(np.random.random()) * args.stepsize * 2 - args.stepsize
+        mu_new = mu + s1
+        s2 = Decimal(np.random.random()) * args.stepsize * 2 - args.stepsize
+        sigma_new = sigma + s2
+
+        if mu_new > args.mu_max or mu_new < args.mu_min:
+            print(mu, sigma, y)
+            continue
+
+        if sigma_new > args.sigma_max or sigma_new < args.sigma_min:
+            print(mu, sigma, y)
+            continue
+
+        # Calculate posteriors
+        y = pdf(data, mu, sigma)
+        y_new = pdf(data, mu_new, sigma_new)
+
+        # Metropolis Algorithm
+        if y_new > y:
+            mu = mu_new
+            sigma = sigma_new
+            y = y_new
+        else:
+            r = np.random.random()
+            if y_new/y > r:
+                mu = mu_new
+                sigma = sigma_new
+                y = y_new
+        print("{0},{1},{2}".format(mu, sigma, y))
