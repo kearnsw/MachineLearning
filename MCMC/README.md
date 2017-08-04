@@ -1,5 +1,6 @@
-HW8 Will Kearns
+Markov Chain Monte Carlo
 ================
+Implementation of the Metropolis-Hastings Algorithm in Python
 
 Generate data
 ----------------
